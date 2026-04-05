@@ -128,3 +128,30 @@ img {
 .item strong {
     font-size: 18px;
 }
+
+/* Landing Page */
+.landing {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to right, #ff4d4d, #ff944d);
+    color: white;
+}
+
+.landing h1 {
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+
+.landing p {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.landing button {
+    background: white;
+    color: #ff4d4d;
+    font-weight: bold;
+}
