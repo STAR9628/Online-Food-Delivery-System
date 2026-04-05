@@ -1,110 +1,52 @@
-/* Reset */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+const http = require('http');
 
-/* Body */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f5f5f5;
-    text-align: center;
-}
+const foodData = [
+    {
+        restaurant: "Domino's",
+        items: [
+            { 
+                name: "Pizza", 
+                price: 200, 
+                image: "https://images.unsplash.com/photo-1594007654729-407eedc4be65?q=80&w=800&auto=format&fit=crop" 
+            },
+            { 
+                name: "Garlic Bread", 
+                price: 120, 
+                image: "https://images.unsplash.com/photo-1608198093002-ad4e005484ec" 
+            }
+        ]
+    },
+    {
+        restaurant: "McDonald's",
+        items: [
+            { 
+                name: "Burger", 
+                price: 100, 
+                image: "https://images.unsplash.com/photo-1550547660-d9450f859349" 
+            },
+            { 
+                name: "Fries", 
+                price: 80, 
+                image: "https://images.unsplash.com/photo-1541592106381-b31e9677c0e5" 
+            }
+        ]
+    }
+];
 
-/* Header */
-h1 {
-    background-color: #ff4d4d;
-    color: white;
-    padding: 20px;
-    font-size: 28px;
-    letter-spacing: 1px;
-}
+const server = http.createServer((req, res) => {
 
-/* Menu section */
-#menu {
-    margin: 30px 0;
-}
+    res.setHeader("Access-Control-Allow-Origin", "*");
 
-/* Menu items */
-.item {
-    background: white;
-    padding: 20px;
-    margin: 15px auto;
-    width: 250px;
-    border-radius: 12px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    transition: transform 0.2s ease;
-}
+    if (req.url === "/menu") {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(foodData));
+    } else {
+        res.write("Server running");
+        res.end();
+    }
 
-.item:hover {
-    transform: scale(1.05);
-}
+});
 
-/* Buttons */
-button {
-    padding: 10px 20px;
-    margin-top: 10px;
-    border: none;
-    background-color: #ff4d4d;
-    color: white;
-    cursor: pointer;
-    border-radius: 6px;
-    font-size: 14px;
-    transition: background 0.3s ease;
-}
-
-button:hover {
-    background-color: #e60000;
-}
-
-/* Cart section */
-h2 {
-    margin-top: 30px;
-}
-
-/* Cart list */
-#cart {
-    list-style: none;
-    padding: 0;
-    margin-top: 15px;
-}
-
-/* Cart items */
-#cart li {
-    background: white;
-    padding: 12px;
-    margin: 10px auto;
-    width: 250px;
-    border-radius: 8px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-}
-
-/* Remove button inside cart */
-#cart button {
-    margin-left: 10px;
-    padding: 5px 10px;
-    font-size: 12px;
-}
-
-/* Total */
-#total {
-    margin-top: 15px;
-    font-weight: bold;
-    font-size: 18px;
-}
-
-/* Place order button */
-button[onclick="placeOrder()"] {
-    margin-top: 20px;
-    padding: 12px 25px;
-    font-size: 16px;
-}
-
-/* Success message */
-#message {
-    margin-top: 15px;
-    color: green;
-    font-weight: bold;
-    font-size: 16px;
-}
+server.listen(3000, () => {
+    console.log("Server running on port 3000");
+});
