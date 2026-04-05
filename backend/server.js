@@ -1,22 +1,110 @@
-const http = require('http');
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-const foodItems = [
-    { name: "Pizza", price: 200 },
-    { name: "Burger", price: 100 }
-];
+/* Body */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    text-align: center;
+}
 
-const server = http.createServer((req, res) => {
+/* Header */
+h1 {
+    background-color: #ff4d4d;
+    color: white;
+    padding: 20px;
+    font-size: 28px;
+    letter-spacing: 1px;
+}
 
-    if (req.url === "/menu") {
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify(foodItems));
-    } else {
-        res.write("Server is running");
-        res.end();
-    }
+/* Menu section */
+#menu {
+    margin: 30px 0;
+}
 
-});
+/* Menu items */
+.item {
+    background: white;
+    padding: 20px;
+    margin: 15px auto;
+    width: 250px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+}
 
-server.listen(3000, () => {
-    console.log("Server running on port 3000");
-});
+.item:hover {
+    transform: scale(1.05);
+}
+
+/* Buttons */
+button {
+    padding: 10px 20px;
+    margin-top: 10px;
+    border: none;
+    background-color: #ff4d4d;
+    color: white;
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: background 0.3s ease;
+}
+
+button:hover {
+    background-color: #e60000;
+}
+
+/* Cart section */
+h2 {
+    margin-top: 30px;
+}
+
+/* Cart list */
+#cart {
+    list-style: none;
+    padding: 0;
+    margin-top: 15px;
+}
+
+/* Cart items */
+#cart li {
+    background: white;
+    padding: 12px;
+    margin: 10px auto;
+    width: 250px;
+    border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+/* Remove button inside cart */
+#cart button {
+    margin-left: 10px;
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+/* Total */
+#total {
+    margin-top: 15px;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+/* Place order button */
+button[onclick="placeOrder()"] {
+    margin-top: 20px;
+    padding: 12px 25px;
+    font-size: 16px;
+}
+
+/* Success message */
+#message {
+    margin-top: 15px;
+    color: green;
+    font-weight: bold;
+    font-size: 16px;
+}
