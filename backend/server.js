@@ -1,8 +1,20 @@
 const http = require('http');
 
+const foodItems = [
+    { name: "Pizza", price: 200 },
+    { name: "Burger", price: 100 }
+];
+
 const server = http.createServer((req, res) => {
-    res.write("Backend is running");
-    res.end();
+
+    if (req.url === "/menu") {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(foodItems));
+    } else {
+        res.write("Server is running");
+        res.end();
+    }
+
 });
 
 server.listen(3000, () => {
