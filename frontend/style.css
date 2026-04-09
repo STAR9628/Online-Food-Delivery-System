@@ -155,3 +155,26 @@ img {
     color: #ff4d4d;
     font-weight: bold;
 }
+
+/* Splash Screen */
+.splash {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(to right, #ff4d4d, #ff944d);
+    color: white;
+    text-align: center;
+}
+
+.splash h1 {
+    font-size: 42px;
+    letter-spacing: 1px;
+}
+
+.splash p {
+    margin-top: 12px;
+    font-size: 18px;
+    opacity: 0.9;
+}
