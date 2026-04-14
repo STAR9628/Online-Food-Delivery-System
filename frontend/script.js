@@ -1,98 +1,93 @@
-let cart = [];
-let foodData = [];
+// ===== CONFIGURATION =====
+const API_BASE = "http://localhost:3000";
 
-// Load restaurants
-async function loadRestaurants() {
-    const response = await fetch("http://localhost:3000/menu");
-    foodData = await response.json();
+// ===== UTILITY FUNCTIONS =====
+function $(id) { return document.getElementById(id); }
 
-    const menuDiv = document.getElementById("menu");
-    menuDiv.innerHTML = "<h2>Select Restaurant</h2>";
-
-    foodData.forEach((rest, index) => {
-        let div = document.createElement("div");
-        div.className = "item";
-
-        div.innerHTML = `
-            <p><strong>${rest.restaurant}</strong></p>
-            <button onclick="showMenu(${index})">View Menu</button>
-        `;
-
-        menuDiv.appendChild(div);
-    });
+function showAlert(id, message, type = "error") {
+  const el = $(id);
+  if (!el) return;
+  el.textContent = message;
+  el.className = `alert alert-${type} show`;
+  setTimeout(() => el.classList.remove("show"), 4000);
 }
 
-// Show selected restaurant menu
-function showMenu(index) {
-    const menuDiv = document.getElementById("menu");
-    const restaurant = foodData[index];
-
-    menuDiv.innerHTML = `<h2>${restaurant.restaurant}</h2>`;
-
-    restaurant.items.forEach(item => {
-        let div = document.createElement("div");
-        div.className = "item";
-
-        div.innerHTML = `
-            <img src="${item.image}">
-            <p>${item.name} - ₹${item.price}</p>
-            <button onclick="addToCart('${item.name}', ${item.price})">Add</button>
-        `;
-
-        menuDiv.appendChild(div);
-    });
-
-    // Back button
-    let backBtn = document.createElement("button");
-    backBtn.textContent = "⬅ Back to Restaurants";
-    backBtn.onclick = loadRestaurants;
-    menuDiv.appendChild(backBtn);
+function setLoading(btnId, isLoading) {
+  const btn = $(btnId);
+  if (!btn) return;
+  btn.classList.toggle("loading", isLoading);
+  btn.disabled = isLoading;
 }
 
-// Cart functions
-function addToCart(item, price) {
-    cart.push({ item, price });
-    displayCart();
-}
+// ===== ADMIN LOGIN =====
+async function handleLogin() {
+  const username = $("username")?.value.trim();
+  const password = $("password")?.value.trim();
 
-function displayCart() {
-    let cartList = document.getElementById("cart");
-    cartList.innerHTML = "";
+  // Clear previous errors
+  $("usernameError")?.classList.remove("show");
+  $("passwordError")?.classList.remove("show");
+  $("username")?.classList.remove("error");
+  $("password")?.classList.remove("error");
 
-    let total = 0;
+  // Validate
+  let hasError = false;
+  if (!username) {
+    $("usernameError")?.classList.add("show");
+    $("username")?.classList.add("error");
+    hasError = true;
+  }
+  if (!password) {
+    $("passwordError")?.classList.add("show");
+    $("password")?.classList.add("error");
+    hasError = true;
+  }
+  if (hasError) return;
 
-    cart.forEach((product, index) => {
-        total += product.price;
+  setLoading("loginBtn", true);
 
-        let li = document.createElement("li");
-        li.textContent = product.item + " - ₹" + product.price;
-
-        let btn = document.createElement("button");
-        btn.textContent = " Remove";
-        btn.onclick = () => removeItem(index);
-
-        li.appendChild(btn);
-        cartList.appendChild(li);
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
     });
 
-    document.getElementById("total").textContent = "Total: ₹" + total;
-}
+    const data = await res.json();
 
-function removeItem(index) {
-    cart.splice(index, 1);
-    displayCart();
-}
+    if (data.success) {
+      // Save session
+      sessionStorage.setItem("adminLoggedIn", "true");
+      sessionStorage.setItem("adminUser", username);
 
-function placeOrder() {
-    if (cart.length === 0) {
-        document.getElementById("message").textContent = "Cart is empty!";
-        return;
+      showAlert("loginSuccess", "✅ Login successful! Redirecting...", "success");
+      setTimeout(() => {
+        window.location.href = "admin.html";
+      }, 1000);
+    } else {
+      showAlert("loginError", "❌ " + data.message);
     }
-
-    document.getElementById("message").textContent = "✅ Order placed successfully!";
-    cart = [];
-    displayCart();
+  } catch (err) {
+    showAlert("loginError", "❌ Cannot connect to server. Is it running?");
+  } finally {
+    setLoading("loginBtn", false);
+  }
 }
 
-// Start app
-window.onload = loadRestaurants;
+// Allow Enter key on login form
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && $("loginBtn")) handleLogin();
+});
+
+// Toggle password visibility
+$("togglePass")?.addEventListener("click", () => {
+  const passInput = $("password");
+  const btn = $("togglePass");
+  if (passInput.type === "password") {
+    passInput.type = "text";
+    btn.textContent = "🙈";
+  } else {
+    passInput.type = "password";
+    btn.textContent = "👁";
+  }
+});

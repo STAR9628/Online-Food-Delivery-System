@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Login – FoodDash</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="admin.css"/>
+</head>
+<body class="login-page">
+
+  <div class="login-wrapper">
+    <!-- Left panel (branding) -->
+    <div class="login-brand">
+      <div class="brand-content">
+        <span class="brand-icon">🍔</span>
+        <h1>FoodDash</h1>
+        <p>Admin Portal</p>
+        <ul class="brand-features">
+          <li>✅ Manage Restaurants</li>
+          <li>✅ Add Menu Items</li>
+          <li>✅ Create Offers</li>
+          <li>✅ View Orders</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Right panel (form) -->
+    <div class="login-form-panel">
+      <div class="login-form-box card">
+        <div class="login-header">
+          <h2>Welcome back</h2>
+          <p>Sign in to your admin account</p>
+        </div>
+
+        <div class="alert alert-error" id="loginError"></div>
+        <div class="alert alert-success" id="loginSuccess"></div>
+
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input
+            type="text"
+            id="username"
+            placeholder="Enter admin username"
+            autocomplete="username"
+          />
+          <span class="error-msg" id="usernameError">Username is required</span>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="password-wrap">
+            <input
+              type="password"
+              id="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+            />
+            <button type="button" class="toggle-pass" id="togglePass">👁</button>
+          </div>
+          <span class="error-msg" id="passwordError">Password is required</span>
+        </div>
+
+        <button class="btn btn-primary btn-large" id="loginBtn" onclick="handleLogin()">
+          Sign In
+        </button>
+
+        <a href="splash.html" class="back-link">← Back to Home</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

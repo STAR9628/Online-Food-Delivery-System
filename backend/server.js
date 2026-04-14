@@ -1,39 +1,102 @@
-const http = require('http');
+const http = require("http");
+const fs = require("fs");
+const path = require("path");
 
-let foodData = []; // dynamic now
+const PORT = 3000;
 
-const server = http.createServer((req, res) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+// Simple in-memory store (we'll upgrade to file-based in a later step)
+const DATA = {
+  adminCredentials: { username: "admin", password: "admin123" },
+  restaurants: [],
+  menuItems: [],
+  offers: [],
+};
 
-    // GET menu
-    if (req.method === "GET" && req.url === "/menu") {
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify(foodData));
+// MIME types
+const MIME = {
+  ".html": "text/html",
+  ".css": "text/css",
+  ".js": "application/javascript",
+  ".json": "application/json",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".svg": "image/svg+xml",
+  ".ico": "image/x-icon",
+};
+
+function serveFile(res, filePath) {
+  fs.readFile(filePath, (err, data) => {
+    if (err) {
+      res.writeHead(404, { "Content-Type": "text/html" });
+      res.end("<h2>404 - Page Not Found</h2>");
+      return;
     }
+    const ext = path.extname(filePath);
+    res.writeHead(200, { "Content-Type": MIME[ext] || "text/plain" });
+    res.end(data);
+  });
+}
 
-    // ADD restaurant (ADMIN)
-    else if (req.method === "POST" && req.url === "/add-restaurant") {
-        let body = "";
+function readBody(req) {
+  return new Promise((resolve) => {
+    let body = "";
+    req.on("data", (chunk) => (body += chunk));
+    req.on("end", () => {
+      try { resolve(JSON.parse(body)); }
+      catch { resolve({}); }
+    });
+  });
+}
 
-        req.on("data", chunk => {
-            body += chunk.toString();
-        });
+function jsonResponse(res, statusCode, data) {
+  res.writeHead(statusCode, {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+  });
+  res.end(JSON.stringify(data));
+}
 
-        req.on("end", () => {
-            const newData = JSON.parse(body);
-            foodData.push(newData);
+const server = http.createServer(async (req, res) => {
+  const urlPath = req.url.split("?")[0];
 
-            res.end(JSON.stringify({ message: "Added successfully" }));
-        });
+  // Handle CORS preflight
+  if (req.method === "OPTIONS") {
+    jsonResponse(res, 200, {});
+    return;
+  }
+
+  // --- API ROUTES ---
+
+  // POST /api/admin/login
+  if (req.method === "POST" && urlPath === "/api/admin/login") {
+    const body = await readBody(req);
+    const { username, password } = body;
+    if (
+      username === DATA.adminCredentials.username &&
+      password === DATA.adminCredentials.password
+    ) {
+      jsonResponse(res, 200, { success: true, message: "Login successful" });
+    } else {
+      jsonResponse(res, 401, { success: false, message: "Invalid credentials" });
     }
+    return;
+  }
 
-    else {
-        res.end("Server running");
-    }
+  // --- STATIC FILE SERVING ---
+  let filePath;
+  if (urlPath === "/" || urlPath === "/splash") {
+    filePath = path.join(__dirname, "../frontend/splash.html");
+  } else {
+    filePath = path.join(__dirname, "../frontend", urlPath);
+  }
+
+  serveFile(res, filePath);
 });
 
-server.listen(3000, () => {
-    console.log("Server running on port 3000");
+server.listen(PORT, () => {
+  console.log(`\n🍔 Food Delivery Server running at http://localhost:${PORT}`);
+  console.log(`📂 Serving frontend from: ${path.join(__dirname, "../frontend")}`);
+  console.log(`🔐 Admin login: http://localhost:${PORT}/admin-login.html\n`);
 });

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard – FoodDash</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+  <script>
+    // Guard: redirect if not logged in
+    if (!sessionStorage.getItem("adminLoggedIn")) {
+      window.location.href = "admin-login.html";
+    }
+  </script>
+
+  <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;">
+    <h1 style="font-size:32px;">🎉 You're logged in!</h1>
+    <p style="color:#686b78;">Admin Dashboard coming in Step 2...</p>
+    <button
+      class="btn btn-danger"
+      style="width:auto;padding:12px 28px;"
+      onclick="sessionStorage.clear(); window.location.href='admin-login.html'">
+      🚪 Logout
+    </button>
+  </div>
+</body>
+</html> 
