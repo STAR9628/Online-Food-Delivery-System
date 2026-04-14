@@ -243,3 +243,212 @@ async function confirmDelete() {
 
 // ===== INIT =====
 if ($("restaurantList")) loadRestaurants();
+// ===== MENU ITEMS =====
+let allMenuItems = [];
+let deleteMenuTargetId = null;
+let menuSearchQuery = "";
+let menuRestFilterValue = "";
+
+function openMenuModal() {
+  // Populate restaurant dropdown
+  const sel = $("menuRestaurant");
+  if (sel) {
+    sel.innerHTML = `<option value="">-- Select Restaurant --</option>` +
+      allRestaurants.map((r) => `<option value="${r.id}">${r.name}</option>`).join("");
+  }
+  openModal("addMenuModal");
+}
+
+async function loadMenuItems() {
+  try {
+    const res = await fetch(`${API_BASE}/api/menu`);
+    const data = await res.json();
+    if (data.success) {
+      allMenuItems = data.menuItems;
+      renderMenuStats();
+      renderMenuList();
+      populateMenuRestFilter();
+    }
+  } catch {
+    showAlert("menuError", "❌ Failed to load menu items.");
+  }
+}
+
+function renderMenuStats() {
+  const veg = allMenuItems.filter((i) => i.isVeg).length;
+  if ($("totalMenuItems")) $("totalMenuItems").textContent = allMenuItems.length;
+  if ($("totalVegItems")) $("totalVegItems").textContent = veg;
+  if ($("totalNonVegItems")) $("totalNonVegItems").textContent = allMenuItems.length - veg;
+}
+
+function populateMenuRestFilter() {
+  const sel = $("menuRestFilter");
+  if (!sel) return;
+  const current = sel.value;
+  sel.innerHTML = `<option value="">🏪 All Restaurants</option>` +
+    allRestaurants.map((r) => `<option value="${r.id}">${r.name}</option>`).join("");
+  sel.value = current;
+}
+
+function filterMenuByRestaurant(val) {
+  menuRestFilterValue = val;
+  renderMenuList();
+}
+
+function filterMenuBySearch(val) {
+  menuSearchQuery = val.toLowerCase();
+  renderMenuList();
+}
+
+function renderMenuList() {
+  const container = $("menuList");
+  if (!container) return;
+
+  let items = allMenuItems;
+
+  if (menuRestFilterValue) {
+    items = items.filter((i) => i.restaurantId === menuRestFilterValue);
+  }
+  if (menuSearchQuery) {
+    items = items.filter(
+      (i) =>
+        i.name.toLowerCase().includes(menuSearchQuery) ||
+        i.category.toLowerCase().includes(menuSearchQuery)
+    );
+  }
+
+  if (items.length === 0) {
+    container.innerHTML = `
+      <div class="card">
+        <div class="empty-state">
+          <span>🍽️</span>
+          <p>No menu items found</p>
+          <small>Add items using the "+ Add Menu Item" button</small>
+        </div>
+      </div>`;
+    return;
+  }
+
+  // Group by restaurant
+  const groups = {};
+  items.forEach((item) => {
+    if (!groups[item.restaurantId]) {
+      groups[item.restaurantId] = {
+        name: item.restaurantName,
+        items: [],
+      };
+    }
+    groups[item.restaurantId].items.push(item);
+  });
+
+  container.innerHTML = Object.entries(groups).map(([restId, group]) => `
+    <div class="menu-group">
+      <div class="menu-group-header">
+        <span>🏪</span>
+        <span>${group.name}</span>
+        <span class="menu-group-count">${group.items.length} items</span>
+      </div>
+      ${group.items.map((item) => `
+        <div class="menu-item-row" id="menu-${item.id}">
+          <div class="veg-dot ${item.isVeg ? "veg" : "nonveg"}"></div>
+          <div class="menu-item-info">
+            <div class="menu-item-name">${item.name}</div>
+            <div class="menu-item-meta">
+              <span>📂 ${item.category}</span>
+              ${item.description ? `<span>• ${item.description}</span>` : ""}
+            </div>
+          </div>
+          <div class="menu-item-price">₹${item.price}</div>
+          <div class="rest-actions">
+            <button class="icon-btn delete" onclick="askDeleteMenu('${item.id}', '${item.name.replace(/'/g, "\\'")}')">🗑️</button>
+          </div>
+        </div>
+      `).join("")}
+    </div>
+  `).join("");
+}
+
+async function saveMenuItem() {
+  const restaurantId = $("menuRestaurant")?.value;
+  const name = $("menuName")?.value.trim();
+  const price = $("menuPrice")?.value;
+  const category = $("menuCategory")?.value;
+  const description = $("menuDescription")?.value.trim();
+  const isVeg = document.querySelector('input[name="vegType"]:checked')?.value === "true";
+
+  // Clear errors
+  ["menuRestErr", "menuNameErr", "menuPriceErr"].forEach((id) => $(`${id}`)?.classList.remove("show"));
+
+  let hasError = false;
+  if (!restaurantId) { $("menuRestErr")?.classList.add("show"); hasError = true; }
+  if (!name) { $("menuNameErr")?.classList.add("show"); hasError = true; }
+  if (!price || parseFloat(price) <= 0) { $("menuPriceErr")?.classList.add("show"); hasError = true; }
+  if (hasError) return;
+
+  setLoading("saveMenuBtn", true);
+  try {
+    const res = await fetch(`${API_BASE}/api/menu`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ restaurantId, name, price, category, isVeg, description }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      closeModal("addMenuModal");
+      clearMenuForm();
+      showAlert("menuSuccess", `✅ "${name}" added successfully!`, "success");
+      loadMenuItems();
+    } else {
+      showAlert("menuError", "❌ " + data.message);
+    }
+  } catch {
+    showAlert("menuError", "❌ Failed to save. Is server running?");
+  } finally {
+    setLoading("saveMenuBtn", false);
+  }
+}
+
+function clearMenuForm() {
+  ["menuName", "menuPrice", "menuDescription"].forEach((id) => { if ($(id)) $(id).value = ""; });
+  if ($("menuRestaurant")) $("menuRestaurant").value = "";
+  if ($("menuCategory")) $("menuCategory").value = "Main Course";
+  const vegRadio = document.querySelector('input[name="vegType"][value="true"]');
+  if (vegRadio) vegRadio.checked = true;
+}
+
+function askDeleteMenu(id, name) {
+  deleteMenuTargetId = id;
+  if ($("deleteMenuName")) $("deleteMenuName").textContent = name;
+  openModal("deleteMenuModal");
+}
+
+async function confirmDeleteMenu() {
+  if (!deleteMenuTargetId) return;
+  setLoading("confirmDeleteMenuBtn", true);
+  try {
+    const res = await fetch(`${API_BASE}/api/menu/${deleteMenuTargetId}`, { method: "DELETE" });
+    const data = await res.json();
+    if (data.success) {
+      closeModal("deleteMenuModal");
+      showAlert("menuSuccess", "✅ Item deleted.", "success");
+      loadMenuItems();
+    } else {
+      showAlert("menuError", "❌ " + data.message);
+    }
+  } catch {
+    showAlert("menuError", "❌ Failed to delete.");
+  } finally {
+    setLoading("confirmDeleteMenuBtn", false);
+    deleteMenuTargetId = null;
+  }
+}
+
+// Load menu items when menu section becomes active
+document.querySelectorAll(".nav-item").forEach((item) => {
+  item.addEventListener("click", () => {
+    if (item.dataset.section === "menu") loadMenuItems();
+  });
+});
+
+// Also init if already on menu section
+if ($("menuList")) loadMenuItems();

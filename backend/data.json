@@ -8,8 +8,38 @@
       "deliveryTime": "30-40",
       "rating": 4,
       "createdAt": "2026-04-14T10:45:46.188Z"
+    },
+    {
+      "id": "1776180205293",
+      "name": "Domino's",
+      "cuisine": "Pizzas",
+      "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Domino%27s_pizza_logo.svg/1280px-Domino%27s_pizza_logo.svg.png",
+      "deliveryTime": "30-40",
+      "rating": 4.5,
+      "createdAt": "2026-04-14T15:23:25.293Z"
+    },
+    {
+      "id": "1776180236973",
+      "name": "KFC",
+      "cuisine": "Burgers",
+      "logo": "https://upload.wikimedia.org/wikipedia/sco/thumb/b/bf/KFC_logo.svg/330px-KFC_logo.svg.png",
+      "deliveryTime": "30-40",
+      "rating": 4,
+      "createdAt": "2026-04-14T15:23:56.973Z"
     }
   ],
-  "menuItems": [],
+  "menuItems": [
+    {
+      "id": "1776180275175",
+      "restaurantId": "1776163546187",
+      "restaurantName": "Burger King",
+      "name": "The Whopper",
+      "price": 200,
+      "category": "Main Course",
+      "isVeg": true,
+      "description": "amazing burger",
+      "createdAt": "2026-04-14T15:24:35.175Z"
+    }
+  ],
   "offers": []
 }

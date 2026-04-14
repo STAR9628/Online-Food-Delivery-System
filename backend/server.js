@@ -114,7 +114,60 @@ const server = http.createServer(async (req, res) => {
     json(res, 200, { success: true, message: "Deleted" });
     return;
   }
+// --- MENU ITEMS ---
+  if (urlPath === "/api/menu") {
+    const data = loadData();
+    if (req.method === "GET") {
+      const params = new URLSearchParams(req.url.split("?")[1] || "");
+      const restaurantId = params.get("restaurantId");
+      const items = restaurantId
+        ? data.menuItems.filter((m) => m.restaurantId === restaurantId)
+        : data.menuItems;
+      json(res, 200, { success: true, menuItems: items });
+      return;
+    }
+    if (req.method === "POST") {
+      const body = await readBody(req);
+      const { restaurantId, name, price, category, isVeg, description } = body;
+      if (!restaurantId || !name || !price) {
+        json(res, 400, { success: false, message: "Restaurant, name and price are required" });
+        return;
+      }
+      const restaurant = data.restaurants.find((r) => r.id === restaurantId);
+      if (!restaurant) {
+        json(res, 404, { success: false, message: "Restaurant not found" });
+        return;
+      }
+      const item = {
+        id: Date.now().toString(),
+        restaurantId,
+        restaurantName: restaurant.name,
+        name: name.trim(),
+        price: parseFloat(price),
+        category: category?.trim() || "Main Course",
+        isVeg: isVeg === true || isVeg === "true",
+        description: description?.trim() || "",
+        createdAt: new Date().toISOString(),
+      };
+      data.menuItems.push(item);
+      saveData(data);
+      json(res, 201, { success: true, item });
+      return;
+    }
+  }
 
+  // DELETE /api/menu/:id
+  const deleteMenuMatch = urlPath.match(/^\/api\/menu\/(.+)$/);
+  if (req.method === "DELETE" && deleteMenuMatch) {
+    const id = deleteMenuMatch[1];
+    const data = loadData();
+    const index = data.menuItems.findIndex((m) => m.id === id);
+    if (index === -1) { json(res, 404, { success: false, message: "Item not found" }); return; }
+    data.menuItems.splice(index, 1);
+    saveData(data);
+    json(res, 200, { success: true, message: "Deleted" });
+    return;
+  }
   // --- STATIC FILES ---
   let filePath;
   if (urlPath === "/" || urlPath === "/splash") {

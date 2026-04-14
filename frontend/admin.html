@@ -7,6 +7,93 @@
   <link rel="stylesheet" href="style.css"/>
   <link rel="stylesheet" href="admin.css"/>
 </head>
+<!-- ===== ADD MENU ITEM MODAL ===== -->
+  <div class="modal-overlay" id="addMenuModal" onclick="closeModalOutside(event, 'addMenuModal')">
+    <div class="modal card">
+      <div class="modal-header">
+        <h3>Add Menu Item</h3>
+        <button class="modal-close" onclick="closeModal('addMenuModal')">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label>Restaurant *</label>
+        <select id="menuRestaurant">
+          <option value="">-- Select Restaurant --</option>
+        </select>
+        <span class="error-msg" id="menuRestErr">Please select a restaurant</span>
+      </div>
+
+      <div class="form-group">
+        <label>Item Name *</label>
+        <input type="text" id="menuName" placeholder="e.g. Chicken Biryani"/>
+        <span class="error-msg" id="menuNameErr">Name is required</span>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Price (₹) *</label>
+          <input type="number" id="menuPrice" placeholder="199" min="1"/>
+          <span class="error-msg" id="menuPriceErr">Valid price required</span>
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="menuCategory">
+            <option>Starter</option>
+            <option selected>Main Course</option>
+            <option>Dessert</option>
+            <option>Beverage</option>
+            <option>Breads</option>
+            <option>Rice & Biryani</option>
+            <option>Snacks</option>
+            <option>Pizza</option>
+            <option>Burger</option>
+            <option>Combo</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Description <span style="color:var(--grey-3);font-weight:400;">(optional)</span></label>
+        <input type="text" id="menuDescription" placeholder="Short description of the dish"/>
+      </div>
+
+      <div class="form-group">
+        <label>Type</label>
+        <div class="veg-toggle">
+          <label class="veg-option">
+            <input type="radio" name="vegType" value="true" checked/>
+            <span class="veg-badge veg">🟢 Veg</span>
+          </label>
+          <label class="veg-option">
+            <input type="radio" name="vegType" value="false"/>
+            <span class="veg-badge nonveg">🔴 Non-Veg</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-outline-dark" onclick="closeModal('addMenuModal')">Cancel</button>
+        <button class="btn btn-primary" id="saveMenuBtn" onclick="saveMenuItem()">Save Item</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE MENU CONFIRM -->
+  <div class="modal-overlay" id="deleteMenuModal" onclick="closeModalOutside(event, 'deleteMenuModal')">
+    <div class="modal card" style="max-width:400px;">
+      <div class="modal-header">
+        <h3>Delete Menu Item</h3>
+        <button class="modal-close" onclick="closeModal('deleteMenuModal')">✕</button>
+      </div>
+      <p style="color:var(--grey-2);margin-bottom:24px;">
+        Are you sure you want to delete <strong id="deleteMenuName"></strong>?
+      </p>
+      <div class="modal-actions">
+        <button class="btn btn-outline-dark" onclick="closeModal('deleteMenuModal')">Cancel</button>
+        <button class="btn btn-danger" id="confirmDeleteMenuBtn" onclick="confirmDeleteMenu()">Delete</button>
+      </div>
+    </div>
+  </div>
 <body class="admin-page">
 
   <script>
@@ -99,17 +186,49 @@
     </section>
 
     <!-- ===== MENU SECTION (stub) ===== -->
+    <!-- ===== MENU SECTION ===== -->
     <section class="admin-section" id="section-menu">
+
       <div class="section-header">
         <div>
           <h2 class="section-title">Menu Items</h2>
-          <p class="section-sub">Coming in Step 3</p>
+          <p class="section-sub">Manage food items for each restaurant</p>
+        </div>
+        <button class="btn btn-primary" onclick="openMenuModal()">
+          + Add Menu Item
+        </button>
+      </div>
+
+      <div class="alert alert-error" id="menuError"></div>
+      <div class="alert alert-success" id="menuSuccess"></div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-num" id="totalMenuItems">0</span>
+          <span class="stat-label">Total Items</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num" id="totalVegItems">0</span>
+          <span class="stat-label">Veg Items</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num" id="totalNonVegItems">0</span>
+          <span class="stat-label">Non-Veg Items</span>
         </div>
       </div>
-      <div class="card" style="padding:60px;text-align:center;color:var(--grey-3);">
-        <div style="font-size:48px;margin-bottom:12px;">🍽️</div>
-        <p style="font-size:16px;">Menu management coming next!</p>
+
+      <!-- Filter bar -->
+      <div class="filter-bar card">
+        <select id="menuRestFilter" onchange="filterMenuByRestaurant(this.value)">
+          <option value="">🏪 All Restaurants</option>
+        </select>
+        <input type="text" class="search-input" placeholder="🔍  Search items..." oninput="filterMenuBySearch(this.value)" style="flex:1;"/>
       </div>
+
+      <!-- Menu list grouped by restaurant -->
+      <div id="menuList"></div>
+
     </section>
 
     <!-- ===== OFFERS SECTION (stub) ===== -->
