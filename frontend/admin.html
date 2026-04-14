@@ -7,23 +7,195 @@
   <link rel="stylesheet" href="style.css"/>
   <link rel="stylesheet" href="admin.css"/>
 </head>
-<body>
+<body class="admin-page">
+
   <script>
-    // Guard: redirect if not logged in
     if (!sessionStorage.getItem("adminLoggedIn")) {
       window.location.href = "admin-login.html";
     }
   </script>
 
-  <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;">
-    <h1 style="font-size:32px;">🎉 You're logged in!</h1>
-    <p style="color:#686b78;">Admin Dashboard coming in Step 2...</p>
-    <button
-      class="btn btn-danger"
-      style="width:auto;padding:12px 28px;"
-      onclick="sessionStorage.clear(); window.location.href='admin-login.html'">
-      🚪 Logout
-    </button>
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <span>🍔</span>
+      <span class="sidebar-logo-text">FoodDash</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-section="restaurants">
+        <span class="nav-icon">🏪</span>
+        <span>Restaurants</span>
+      </a>
+      <a href="#" class="nav-item" data-section="menu">
+        <span class="nav-icon">🍽️</span>
+        <span>Menu Items</span>
+      </a>
+      <a href="#" class="nav-item" data-section="offers">
+        <span class="nav-icon">🏷️</span>
+        <span>Offers</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="admin-user">
+        <div class="admin-avatar">A</div>
+        <div class="admin-info">
+          <span class="admin-name" id="adminName">Admin</span>
+          <span class="admin-role">Administrator</span>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="admin-main">
+
+    <!-- Top bar -->
+    <header class="admin-topbar">
+      <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-title" id="topbarTitle">Restaurants</div>
+    </header>
+
+    <!-- ===== RESTAURANTS SECTION ===== -->
+    <section class="admin-section active" id="section-restaurants">
+
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Restaurants</h2>
+          <p class="section-sub">Manage all restaurants on the platform</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('addRestaurantModal')">
+          + Add Restaurant
+        </button>
+      </div>
+
+      <div class="alert alert-error" id="restError"></div>
+      <div class="alert alert-success" id="restSuccess"></div>
+
+      <!-- Stats row -->
+      <div class="stats-row" id="restStats">
+        <div class="stat-card">
+          <span class="stat-num" id="totalRestaurants">0</span>
+          <span class="stat-label">Total Restaurants</span>
+        </div>
+      </div>
+
+      <!-- Restaurant list -->
+      <div class="card">
+        <div class="card-header">
+          <span>All Restaurants</span>
+          <input type="text" class="search-input" placeholder="🔍  Search restaurants..." oninput="filterRestaurants(this.value)"/>
+        </div>
+        <div id="restaurantList" class="restaurant-list">
+          <div class="empty-state">
+            <span>🏪</span>
+            <p>No restaurants yet</p>
+            <small>Click "Add Restaurant" to get started</small>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== MENU SECTION (stub) ===== -->
+    <section class="admin-section" id="section-menu">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Menu Items</h2>
+          <p class="section-sub">Coming in Step 3</p>
+        </div>
+      </div>
+      <div class="card" style="padding:60px;text-align:center;color:var(--grey-3);">
+        <div style="font-size:48px;margin-bottom:12px;">🍽️</div>
+        <p style="font-size:16px;">Menu management coming next!</p>
+      </div>
+    </section>
+
+    <!-- ===== OFFERS SECTION (stub) ===== -->
+    <section class="admin-section" id="section-offers">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Offers & Discounts</h2>
+          <p class="section-sub">Coming in Step 4</p>
+        </div>
+      </div>
+      <div class="card" style="padding:60px;text-align:center;color:var(--grey-3);">
+        <div style="font-size:48px;margin-bottom:12px;">🏷️</div>
+        <p style="font-size:16px;">Offers management coming soon!</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== ADD RESTAURANT MODAL ===== -->
+  <div class="modal-overlay" id="addRestaurantModal" onclick="closeModalOutside(event, 'addRestaurantModal')">
+    <div class="modal card">
+      <div class="modal-header">
+        <h3>Add Restaurant</h3>
+        <button class="modal-close" onclick="closeModal('addRestaurantModal')">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label>Restaurant Name *</label>
+        <input type="text" id="restName" placeholder="e.g. Burger King"/>
+        <span class="error-msg" id="restNameErr">Name is required</span>
+      </div>
+
+      <div class="form-group">
+        <label>Cuisine Type *</label>
+        <input type="text" id="restCuisine" placeholder="e.g. North Indian, Chinese, Fast Food"/>
+        <span class="error-msg" id="restCuisineErr">Cuisine is required</span>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Delivery Time (mins)</label>
+          <select id="restDelivery">
+            <option value="15-20">15–20 mins</option>
+            <option value="20-30">20–30 mins</option>
+            <option value="30-40" selected>30–40 mins</option>
+            <option value="40-50">40–50 mins</option>
+            <option value="50-60">50–60 mins</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Rating (1–5)</label>
+          <input type="number" id="restRating" placeholder="4.2" min="1" max="5" step="0.1" value="4.0"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Logo URL <span style="color:var(--grey-3);font-weight:400;">(optional)</span></label>
+        <input type="url" id="restLogo" placeholder="https://example.com/logo.png"/>
+        <small style="color:var(--grey-3);font-size:12px;margin-top:4px;display:block;">Leave blank to use auto-generated logo</small>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-outline-dark" onclick="closeModal('addRestaurantModal')">Cancel</button>
+        <button class="btn btn-primary" id="saveRestBtn" onclick="saveRestaurant()">Save Restaurant</button>
+      </div>
+    </div>
   </div>
+
+  <!-- ===== DELETE CONFIRM MODAL ===== -->
+  <div class="modal-overlay" id="deleteModal" onclick="closeModalOutside(event, 'deleteModal')">
+    <div class="modal card" style="max-width:400px;">
+      <div class="modal-header">
+        <h3>Delete Restaurant</h3>
+        <button class="modal-close" onclick="closeModal('deleteModal')">✕</button>
+      </div>
+      <p style="color:var(--grey-2);margin-bottom:24px;">
+        Are you sure you want to delete <strong id="deleteRestName"></strong>?
+        This action cannot be undone.
+      </p>
+      <div class="modal-actions">
+        <button class="btn btn-outline-dark" onclick="closeModal('deleteModal')">Cancel</button>
+        <button class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
-</html> 
+</html>

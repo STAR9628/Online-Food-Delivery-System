@@ -1,0 +1,15 @@
+{
+  "restaurants": [
+    {
+      "id": "1776163546187",
+      "name": "Burger King",
+      "cuisine": "Fast Food",
+      "logo": "https://1000logos.net/wp-content/uploads/2016/10/Burger-King-Logo-1999.jpg",
+      "deliveryTime": "30-40",
+      "rating": 4,
+      "createdAt": "2026-04-14T10:45:46.188Z"
+    }
+  ],
+  "menuItems": [],
+  "offers": []
+}

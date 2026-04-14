@@ -3,32 +3,35 @@ const fs = require("fs");
 const path = require("path");
 
 const PORT = 3000;
+const DATA_FILE = path.join(__dirname, "data.json");
 
-// Simple in-memory store (we'll upgrade to file-based in a later step)
-const DATA = {
-  adminCredentials: { username: "admin", password: "admin123" },
-  restaurants: [],
-  menuItems: [],
-  offers: [],
-};
+// ===== DATA HELPERS =====
+function loadData() {
+  if (!fs.existsSync(DATA_FILE)) {
+    const initial = { restaurants: [], menuItems: [], offers: [] };
+    fs.writeFileSync(DATA_FILE, JSON.stringify(initial, null, 2));
+    return initial;
+  }
+  return JSON.parse(fs.readFileSync(DATA_FILE, "utf-8"));
+}
 
-// MIME types
+function saveData(data) {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+}
+
+// ===== STATIC FILE SERVING =====
 const MIME = {
-  ".html": "text/html",
-  ".css": "text/css",
-  ".js": "application/javascript",
-  ".json": "application/json",
-  ".png": "image/png",
-  ".jpg": "image/jpeg",
-  ".svg": "image/svg+xml",
-  ".ico": "image/x-icon",
+  ".html": "text/html", ".css": "text/css",
+  ".js": "application/javascript", ".json": "application/json",
+  ".png": "image/png", ".jpg": "image/jpeg",
+  ".svg": "image/svg+xml", ".ico": "image/x-icon",
 };
 
 function serveFile(res, filePath) {
   fs.readFile(filePath, (err, data) => {
     if (err) {
       res.writeHead(404, { "Content-Type": "text/html" });
-      res.end("<h2>404 - Page Not Found</h2>");
+      res.end("<h2>404 – Not Found</h2>");
       return;
     }
     const ext = path.extname(filePath);
@@ -41,62 +44,88 @@ function readBody(req) {
   return new Promise((resolve) => {
     let body = "";
     req.on("data", (chunk) => (body += chunk));
-    req.on("end", () => {
-      try { resolve(JSON.parse(body)); }
-      catch { resolve({}); }
-    });
+    req.on("end", () => { try { resolve(JSON.parse(body)); } catch { resolve({}); } });
   });
 }
 
-function jsonResponse(res, statusCode, data) {
-  res.writeHead(statusCode, {
+function json(res, status, data) {
+  res.writeHead(status, {
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
   });
   res.end(JSON.stringify(data));
 }
 
+// ===== SERVER =====
 const server = http.createServer(async (req, res) => {
   const urlPath = req.url.split("?")[0];
 
-  // Handle CORS preflight
-  if (req.method === "OPTIONS") {
-    jsonResponse(res, 200, {});
-    return;
-  }
+  if (req.method === "OPTIONS") { json(res, 200, {}); return; }
 
-  // --- API ROUTES ---
-
-  // POST /api/admin/login
+  // --- ADMIN LOGIN ---
   if (req.method === "POST" && urlPath === "/api/admin/login") {
-    const body = await readBody(req);
-    const { username, password } = body;
-    if (
-      username === DATA.adminCredentials.username &&
-      password === DATA.adminCredentials.password
-    ) {
-      jsonResponse(res, 200, { success: true, message: "Login successful" });
+    const { username, password } = await readBody(req);
+    if (username === "admin" && password === "admin123") {
+      json(res, 200, { success: true });
     } else {
-      jsonResponse(res, 401, { success: false, message: "Invalid credentials" });
+      json(res, 401, { success: false, message: "Invalid credentials" });
     }
     return;
   }
 
-  // --- STATIC FILE SERVING ---
+  // --- RESTAURANTS ---
+  if (urlPath === "/api/restaurants") {
+    const data = loadData();
+    if (req.method === "GET") {
+      json(res, 200, { success: true, restaurants: data.restaurants });
+      return;
+    }
+    if (req.method === "POST") {
+      const body = await readBody(req);
+      const { name, cuisine, logo, deliveryTime, rating } = body;
+      if (!name || !cuisine) { json(res, 400, { success: false, message: "Name and cuisine required" }); return; }
+      const restaurant = {
+        id: Date.now().toString(),
+        name: name.trim(),
+        cuisine: cuisine.trim(),
+        logo: logo?.trim() || "",
+        deliveryTime: deliveryTime || "30-40",
+        rating: parseFloat(rating) || 4.0,
+        createdAt: new Date().toISOString(),
+      };
+      data.restaurants.push(restaurant);
+      saveData(data);
+      json(res, 201, { success: true, restaurant });
+      return;
+    }
+  }
+
+  // DELETE /api/restaurants/:id
+  const deleteMatch = urlPath.match(/^\/api\/restaurants\/(.+)$/);
+  if (req.method === "DELETE" && deleteMatch) {
+    const id = deleteMatch[1];
+    const data = loadData();
+    const index = data.restaurants.findIndex((r) => r.id === id);
+    if (index === -1) { json(res, 404, { success: false, message: "Not found" }); return; }
+    data.restaurants.splice(index, 1);
+    saveData(data);
+    json(res, 200, { success: true, message: "Deleted" });
+    return;
+  }
+
+  // --- STATIC FILES ---
   let filePath;
   if (urlPath === "/" || urlPath === "/splash") {
     filePath = path.join(__dirname, "../frontend/splash.html");
   } else {
     filePath = path.join(__dirname, "../frontend", urlPath);
   }
-
   serveFile(res, filePath);
 });
 
 server.listen(PORT, () => {
-  console.log(`\n🍔 Food Delivery Server running at http://localhost:${PORT}`);
-  console.log(`📂 Serving frontend from: ${path.join(__dirname, "../frontend")}`);
-  console.log(`🔐 Admin login: http://localhost:${PORT}/admin-login.html\n`);
+  console.log(`\n🍔 FoodDash running → http://localhost:${PORT}`);
+  console.log(`🔐 Admin login   → http://localhost:${PORT}/admin-login.html\n`);
 });
