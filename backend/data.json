@@ -51,5 +51,27 @@
       "expiryDate": "2026-04-22",
       "createdAt": "2026-04-14T15:46:58.736Z"
     }
+  ],
+  "orders": [
+    {
+      "id": "ORD-1776183910339",
+      "restaurantId": "1776163546187",
+      "restaurantName": "Burger King",
+      "items": [
+        {
+          "id": "1776180275175",
+          "name": "The Whopper",
+          "price": 200,
+          "qty": 3,
+          "isVeg": true
+        }
+      ],
+      "subtotal": 600,
+      "discount": 0,
+      "total": 600,
+      "offerCode": null,
+      "status": "Placed",
+      "placedAt": "2026-04-14T16:25:10.339Z"
+    }
   ]
 }

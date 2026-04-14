@@ -8,13 +8,13 @@ const DATA_FILE = path.join(__dirname, "data.json");
 // ===== DATA HELPERS =====
 function loadData() {
   if (!fs.existsSync(DATA_FILE)) {
-    const initial = { restaurants: [], menuItems: [], offers: [] };
+    const initial = { restaurants: [], menuItems: [], offers: [], orders: [] };
     fs.writeFileSync(DATA_FILE, JSON.stringify(initial, null, 2));
     return initial;
   }
   const data = JSON.parse(fs.readFileSync(DATA_FILE, "utf-8"));
-  // Ensure offers array exists in older data files
   if (!data.offers) data.offers = [];
+  if (!data.orders) data.orders = [];
   return data;
 }
 
@@ -246,7 +246,51 @@ const server = http.createServer(async (req, res) => {
     json(res, 200, { success: true, message: "Offer deleted" });
     return;
   }
+// =====================================================
+  // --- STEP 6: ORDERS ---
+  // =====================================================
 
+  // POST /api/orders → place a new order
+  // GET  /api/orders → fetch all orders
+  if (urlPath === "/api/orders") {
+    const data = loadData();
+    if (!data.orders) data.orders = [];
+
+    if (req.method === "GET") {
+      json(res, 200, { success: true, orders: data.orders });
+      return;
+    }
+
+    if (req.method === "POST") {
+      const body = await readBody(req);
+      const { restaurantId, restaurantName, items, subtotal, discount, total, offerCode } = body;
+
+      if (!items || items.length === 0) {
+        json(res, 400, { success: false, message: "Cart is empty" });
+        return;
+      }
+
+      const orderId = "ORD-" + Date.now();
+
+      const order = {
+        id: orderId,
+        restaurantId: restaurantId || null,
+        restaurantName: restaurantName || "Unknown",
+        items,               // [{ name, price, qty }]
+        subtotal: subtotal || 0,
+        discount: discount || 0,
+        total: total || 0,
+        offerCode: offerCode || null,
+        status: "Placed",
+        placedAt: new Date().toISOString(),
+      };
+
+      data.orders.push(order);
+      saveData(data);
+      json(res, 201, { success: true, order });
+      return;
+    }
+  }
   // --- STATIC FILES ---
   let filePath;
   if (urlPath === "/" || urlPath === "/splash") {

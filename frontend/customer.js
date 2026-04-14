@@ -382,20 +382,77 @@ function applyOffer() {
 // ===================================================
 // 8. CHECKOUT (simple clear cart for now)
 // ===================================================
-function checkout() {
+// ===================================================
+// 8. CHECKOUT (simple clear cart for now)
+// ===================================================
+// ===================================================
+// 8. PLACE ORDER — sends cart to backend
+// ===================================================
+async function checkout() {
   if (cart.length === 0) return;
 
-  // Clear cart
-  cart        = [];
-  activeOffer = null;
-  document.getElementById("offerCodeInput").value = "";
-  document.getElementById("offerMsg").textContent = "";
+  // Build order payload
+  const subtotal = cart.reduce((sum, c) => sum + c.item.price * c.qty, 0);
+  const discount = activeOffer
+    ? Math.round((subtotal * activeOffer.discount) / 100)
+    : 0;
+  const total = subtotal - discount;
 
-  updateCartUI();
-  toggleCart();
+  // Flatten items for storage
+  const items = cart.map(c => ({
+    id:    c.item.id,
+    name:  c.item.name,
+    price: c.item.price,
+    qty:   c.qty,
+    isVeg: c.item.isVeg,
+  }));
 
-  // Show success toast
-  const toast = document.getElementById("successToast");
-  toast.classList.add("show");
-  setTimeout(() => toast.classList.remove("show"), 3000);
+  const orderPayload = {
+    restaurantId:   currentRestaurant ? currentRestaurant.id   : null,
+    restaurantName: currentRestaurant ? currentRestaurant.name : "Multiple",
+    items,
+    subtotal,
+    discount,
+    total,
+    offerCode: activeOffer ? activeOffer.code : null,
+  };
+
+  // Disable button to prevent double-click
+  const placeBtn = document.querySelector(".checkout-btn");
+  if (placeBtn) { placeBtn.disabled = true; placeBtn.textContent = "Placing..."; }
+
+  try {
+    const res  = await fetch(`${API_BASE}/api/orders`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify(orderPayload),
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      // Clear cart state
+      cart        = [];
+      activeOffer = null;
+      document.getElementById("offerCodeInput").value = "";
+      document.getElementById("offerMsg").textContent  = "";
+
+      updateCartUI();
+      toggleCart();
+
+      // Show success toast with Order ID
+      const toast = document.getElementById("successToast");
+      toast.textContent = `✅ Order placed! ID: ${data.order.id}`;
+      toast.classList.add("show");
+      setTimeout(() => {
+        toast.classList.remove("show");
+        toast.textContent = "✅ Order placed successfully!"; // reset
+      }, 4000);
+    } else {
+      alert("❌ Failed to place order: " + data.message);
+    }
+  } catch {
+    alert("❌ Cannot reach server. Is it running?");
+  } finally {
+    if (placeBtn) { placeBtn.disabled = false; placeBtn.textContent = "Place Order →"; }
+  }
 }
