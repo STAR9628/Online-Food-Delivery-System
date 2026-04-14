@@ -3,15 +3,167 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FoodDash – Order Food</title>
+  <title>FoodDash – Order Food Online</title>
   <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="customer.css"/>
 </head>
-<body>
-  <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;">
-    <h1 style="font-size:32px;">🛒 Customer UI</h1>
-    <p style="color:#686b78;">Restaurant listing coming in Step 3...</p>
-    <a href="splash.html" class="btn btn-primary" style="width:auto;padding:12px 28px;">← Back</a>
+<body class="customer-page">
+
+  <!-- ===== HEADER / NAVBAR ===== -->
+  <header class="customer-header">
+    <div class="header-inner">
+      <a href="splash.html" class="header-logo">
+        <span class="logo-emoji">🍔</span>
+        <span class="logo-name">FoodDash</span>
+      </a>
+
+      <div class="header-search">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search restaurants or cuisines..."
+          oninput="filterRestaurants(this.value)"
+        />
+      </div>
+
+      <!-- Cart Button -->
+      <button class="cart-btn" onclick="toggleCart()" id="cartBtn">
+        🛒
+        <span class="cart-badge" id="cartCount">0</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="customer-main">
+
+    <!-- Offers Banner -->
+    <section class="offers-banner" id="offersBanner" style="display:none;">
+      <div class="offers-inner">
+        <span class="offers-label">🏷️ Offers</span>
+        <div class="offers-scroll" id="offersScroll"></div>
+      </div>
+    </section>
+
+    <!-- Section Title -->
+    <div class="section-header">
+      <h2 class="section-title">All Restaurants</h2>
+      <span class="section-count" id="restCount"></span>
+    </div>
+
+    <!-- Loading Skeleton -->
+    <div class="restaurant-grid" id="skeletonGrid">
+      <div class="restaurant-card skeleton"></div>
+      <div class="restaurant-card skeleton"></div>
+      <div class="restaurant-card skeleton"></div>
+      <div class="restaurant-card skeleton"></div>
+      <div class="restaurant-card skeleton"></div>
+      <div class="restaurant-card skeleton"></div>
+    </div>
+
+    <!-- Restaurant Grid -->
+    <div class="restaurant-grid" id="restaurantGrid" style="display:none;"></div>
+
+    <!-- Empty State -->
+    <div class="empty-state-customer" id="emptyState" style="display:none;">
+      <div class="empty-icon">🏪</div>
+      <h3>No restaurants found</h3>
+      <p>Try a different search, or check back later.</p>
+    </div>
+
+    <!-- Error State -->
+    <div class="error-state" id="errorState" style="display:none;">
+      <div class="empty-icon">⚠️</div>
+      <h3>Could not load restaurants</h3>
+      <p>Make sure the server is running on <strong>localhost:3000</strong></p>
+      <button class="btn btn-primary" style="margin-top:16px;background:var(--primary);color:#fff;" onclick="loadRestaurants()">Retry</button>
+    </div>
+
+  </main>
+
+  <!-- ===== CART PANEL ===== -->
+  <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+  <aside class="cart-panel" id="cartPanel">
+    <div class="cart-header">
+      <h3>🛒 Your Cart</h3>
+      <button class="cart-close" onclick="toggleCart()">✕</button>
+    </div>
+
+    <!-- Offer Apply -->
+    <div class="offer-apply" id="offerApplySection" style="display:none;">
+      <div class="offer-input-row">
+        <input type="text" id="offerCodeInput" placeholder="Enter offer code" />
+        <button onclick="applyOffer()">Apply</button>
+      </div>
+      <div id="offerMsg" class="offer-msg"></div>
+    </div>
+
+    <div class="cart-items" id="cartItems">
+      <div class="cart-empty">
+        <span>🛒</span>
+        <p>Your cart is empty</p>
+        <small>Add items from a restaurant to get started</small>
+      </div>
+    </div>
+
+    <div class="cart-footer" id="cartFooter" style="display:none;">
+      <div class="cart-totals">
+        <div class="total-row">
+          <span>Subtotal</span>
+          <span id="cartSubtotal">₹0</span>
+        </div>
+        <div class="total-row discount-row" id="discountRow" style="display:none;">
+          <span id="discountLabel">Discount</span>
+          <span id="cartDiscount" class="discount-val">-₹0</span>
+        </div>
+        <div class="total-row grand-total">
+          <span>Total</span>
+          <span id="cartTotal">₹0</span>
+        </div>
+      </div>
+      <button class="checkout-btn" onclick="checkout()">Place Order →</button>
+    </div>
+  </aside>
+
+  <!-- ===== MENU MODAL ===== -->
+  <div class="modal-overlay" id="menuModal" onclick="closeMenuModal(event)">
+    <div class="menu-modal-box">
+
+      <div class="menu-modal-header">
+        <div class="menu-restaurant-info">
+          <img id="menuRestLogo" src="" alt="" class="menu-rest-logo" onerror="this.style.display='none'"/>
+          <div>
+            <h2 id="menuRestName"></h2>
+            <p id="menuRestCuisine" class="menu-rest-cuisine"></p>
+          </div>
+        </div>
+        <button class="modal-close" onclick="document.getElementById('menuModal').classList.remove('open')">✕</button>
+      </div>
+
+      <div class="menu-modal-body">
+        <!-- Loading -->
+        <div id="menuLoading" class="menu-loading">
+          <div class="spinner"></div>
+          <p>Loading menu...</p>
+        </div>
+
+        <!-- Menu Content -->
+        <div id="menuContent" style="display:none;"></div>
+
+        <!-- Menu Empty -->
+        <div id="menuEmpty" style="display:none;" class="menu-empty">
+          <span>🍽️</span>
+          <p>No menu items yet</p>
+        </div>
+      </div>
+
+    </div>
   </div>
-  <script src="script.js"></script>
+
+  <!-- ===== ORDER SUCCESS TOAST ===== -->
+  <div class="toast" id="successToast">✅ Order placed successfully!</div>
+
+  <script src="customer.js"></script>
 </body>
 </html>
