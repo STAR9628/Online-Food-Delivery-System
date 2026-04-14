@@ -12,7 +12,10 @@ function loadData() {
     fs.writeFileSync(DATA_FILE, JSON.stringify(initial, null, 2));
     return initial;
   }
-  return JSON.parse(fs.readFileSync(DATA_FILE, "utf-8"));
+  const data = JSON.parse(fs.readFileSync(DATA_FILE, "utf-8"));
+  // Ensure offers array exists in older data files
+  if (!data.offers) data.offers = [];
+  return data;
 }
 
 function saveData(data) {
@@ -103,9 +106,9 @@ const server = http.createServer(async (req, res) => {
   }
 
   // DELETE /api/restaurants/:id
-  const deleteMatch = urlPath.match(/^\/api\/restaurants\/(.+)$/);
-  if (req.method === "DELETE" && deleteMatch) {
-    const id = deleteMatch[1];
+  const deleteRestMatch = urlPath.match(/^\/api\/restaurants\/(.+)$/);
+  if (req.method === "DELETE" && deleteRestMatch) {
+    const id = deleteRestMatch[1];
     const data = loadData();
     const index = data.restaurants.findIndex((r) => r.id === id);
     if (index === -1) { json(res, 404, { success: false, message: "Not found" }); return; }
@@ -114,7 +117,8 @@ const server = http.createServer(async (req, res) => {
     json(res, 200, { success: true, message: "Deleted" });
     return;
   }
-// --- MENU ITEMS ---
+
+  // --- MENU ITEMS ---
   if (urlPath === "/api/menu") {
     const data = loadData();
     if (req.method === "GET") {
@@ -168,6 +172,81 @@ const server = http.createServer(async (req, res) => {
     json(res, 200, { success: true, message: "Deleted" });
     return;
   }
+
+  // =====================================================
+  // --- STEP 4: OFFERS ---
+  // =====================================================
+
+  // GET /api/offers  →  list all offers
+  // POST /api/offers →  create offer
+  if (urlPath === "/api/offers") {
+    const data = loadData();
+
+    if (req.method === "GET") {
+      json(res, 200, { success: true, offers: data.offers });
+      return;
+    }
+
+    if (req.method === "POST") {
+      const body = await readBody(req);
+      const { code, discount, restaurantId, expiryDate } = body;
+
+      // Validation
+      if (!code || !discount || !restaurantId || !expiryDate) {
+        json(res, 400, { success: false, message: "All fields are required" });
+        return;
+      }
+      if (discount < 1 || discount > 100) {
+        json(res, 400, { success: false, message: "Discount must be between 1 and 100" });
+        return;
+      }
+
+      // Duplicate code check (case-insensitive)
+      const duplicate = data.offers.find(
+        (o) => o.code.toUpperCase() === code.toUpperCase().trim()
+      );
+      if (duplicate) {
+        json(res, 409, { success: false, message: `Offer code "${code.toUpperCase()}" already exists` });
+        return;
+      }
+
+      // Restaurant must exist
+      const restaurant = data.restaurants.find((r) => r.id === restaurantId);
+      if (!restaurant) {
+        json(res, 404, { success: false, message: "Restaurant not found" });
+        return;
+      }
+
+      const offer = {
+        id: Date.now().toString(),
+        code: code.toUpperCase().trim(),
+        discount: parseFloat(discount),
+        restaurantId,
+        restaurantName: restaurant.name,
+        expiryDate,                          // stored as "YYYY-MM-DD"
+        createdAt: new Date().toISOString(),
+      };
+
+      data.offers.push(offer);
+      saveData(data);
+      json(res, 201, { success: true, offer });
+      return;
+    }
+  }
+
+  // DELETE /api/offers/:id
+  const deleteOfferMatch = urlPath.match(/^\/api\/offers\/(.+)$/);
+  if (req.method === "DELETE" && deleteOfferMatch) {
+    const id = deleteOfferMatch[1];
+    const data = loadData();
+    const index = data.offers.findIndex((o) => o.id === id);
+    if (index === -1) { json(res, 404, { success: false, message: "Offer not found" }); return; }
+    data.offers.splice(index, 1);
+    saveData(data);
+    json(res, 200, { success: true, message: "Offer deleted" });
+    return;
+  }
+
   // --- STATIC FILES ---
   let filePath;
   if (urlPath === "/" || urlPath === "/splash") {

@@ -232,18 +232,126 @@
     </section>
 
     <!-- ===== OFFERS SECTION (stub) ===== -->
+    <!-- ===== OFFERS SECTION ===== -->
+    <!-- REPLACE the entire <section id="section-offers">...</section> stub with this -->
     <section class="admin-section" id="section-offers">
+
       <div class="section-header">
         <div>
           <h2 class="section-title">Offers & Discounts</h2>
-          <p class="section-sub">Coming in Step 4</p>
+          <p class="section-sub">Create and manage discount codes for restaurants</p>
+        </div>
+        <button class="btn btn-primary" onclick="openOfferModal()">
+          + Add Offer
+        </button>
+      </div>
+
+      <div class="alert alert-error"   id="offerError"></div>
+      <div class="alert alert-success" id="offerSuccess"></div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-num" id="totalOffers">0</span>
+          <span class="stat-label">Total Offers</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num" id="activeOffers" style="color:#27ae60;">0</span>
+          <span class="stat-label">Active</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num" id="expiredOffers" style="color:#e74c3c;">0</span>
+          <span class="stat-label">Expired</span>
         </div>
       </div>
-      <div class="card" style="padding:60px;text-align:center;color:var(--grey-3);">
-        <div style="font-size:48px;margin-bottom:12px;">🏷️</div>
-        <p style="font-size:16px;">Offers management coming soon!</p>
+
+      <!-- Filter bar -->
+      <div class="filter-bar card">
+        <select id="offerStatusFilter" onchange="renderOffers()">
+          <option value="">🏷️ All Status</option>
+          <option value="active">✅ Active</option>
+          <option value="expired">❌ Expired</option>
+        </select>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="🔍  Search by code or restaurant..."
+          oninput="filterOffersBySearch(this.value)"
+          style="flex:1;"
+        />
       </div>
+
+      <!-- Offers list -->
+      <div class="card" id="offersCard">
+        <div class="card-header">
+          <span>All Offers</span>
+        </div>
+        <div id="offersList"></div>
+      </div>
+
     </section>
+
+    <!-- ===== ADD OFFER MODAL ===== -->
+    <!-- Place this right before the closing </main> tag, alongside the other modals -->
+    <div class="modal-overlay" id="addOfferModal" onclick="closeModalOutside(event, 'addOfferModal')">
+      <div class="modal card">
+        <div class="modal-header">
+          <h3>🏷️ Create Offer</h3>
+          <button class="modal-close" onclick="closeModal('addOfferModal')">✕</button>
+        </div>
+
+        <div class="form-group">
+          <label>Offer Code *</label>
+          <input type="text" id="offerCode" placeholder="e.g. SAVE20" maxlength="20"
+                 style="text-transform:uppercase;"/>
+          <span class="error-msg" id="offerCodeErr">Offer code is required</span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Discount % *</label>
+            <input type="number" id="offerDiscount" placeholder="e.g. 20" min="1" max="100"/>
+            <span class="error-msg" id="offerDiscountErr">Enter a value between 1–100</span>
+          </div>
+          <div class="form-group">
+            <label>Expiry Date *</label>
+            <input type="date" id="offerExpiry"/>
+            <span class="error-msg" id="offerExpiryErr">Expiry date is required</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Restaurant *</label>
+          <select id="offerRestaurant">
+            <option value="">-- Select Restaurant --</option>
+          </select>
+          <span class="error-msg" id="offerRestErr">Please select a restaurant</span>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-outline-dark" onclick="closeModal('addOfferModal')">Cancel</button>
+          <button class="btn btn-primary" id="saveOfferBtn" onclick="saveOffer()">Save Offer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DELETE OFFER CONFIRM MODAL -->
+    <div class="modal-overlay" id="deleteOfferModal" onclick="closeModalOutside(event, 'deleteOfferModal')">
+      <div class="modal card" style="max-width:400px;">
+        <div class="modal-header">
+          <h3>Delete Offer</h3>
+          <button class="modal-close" onclick="closeModal('deleteOfferModal')">✕</button>
+        </div>
+        <p style="color:var(--grey-2);margin-bottom:24px;">
+          Are you sure you want to delete offer <strong id="deleteOfferCode"></strong>?
+          This action cannot be undone.
+        </p>
+        <div class="modal-actions">
+          <button class="btn btn-outline-dark" onclick="closeModal('deleteOfferModal')">Cancel</button>
+          <button class="btn btn-danger" id="confirmDeleteOfferBtn" onclick="confirmDeleteOffer()">Delete</button>
+        </div>
+      </div>
+    </div>
 
   </main>
 

@@ -562,3 +562,93 @@
   background: #fdecea;
   color: #c0392b;
 }
+
+/* =====================================================
+   STEP 4 — OFFERS & DISCOUNTS
+   Append this block to the END of admin.css
+   ===================================================== */
+
+/* ── Offers table ── */
+.offers-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.offers-table thead tr {
+  background: var(--grey-5);
+}
+
+.offers-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--grey-3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.offers-table td {
+  padding: 14px 16px;
+  border-top: 1px solid var(--grey-5);
+  vertical-align: middle;
+}
+
+.offers-table tbody tr {
+  transition: background 0.15s;
+}
+
+.offers-table tbody tr:hover {
+  background: #fafafa;
+}
+
+/* ── Offer code badge ── */
+.offer-code-badge {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  background: var(--grey-5);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  color: var(--dark);
+  border: 1px solid var(--grey-4);
+}
+
+/* ── Discount pill ── */
+.discount-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid #fdd9b5;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ── Status badge ── */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge.active {
+  background: #eafaf1;
+  color: #27ae60;
+  border: 1px solid #a9dfbf;
+}
+
+.status-badge.expired {
+  background: #fdecea;
+  color: #c0392b;
+  border: 1px solid #f5c6c2;
+}

@@ -452,3 +452,246 @@ document.querySelectorAll(".nav-item").forEach((item) => {
 
 // Also init if already on menu section
 if ($("menuList")) loadMenuItems();
+
+// =====================================================
+// ===== STEP 4: OFFERS & DISCOUNTS =====
+// Append this entire block to the END of script.js
+// =====================================================
+
+let allOffers = [];
+let offerSearchQuery = "";
+let deleteOfferTargetId = null;
+
+// ── Load offers from backend ──────────────────────────
+async function loadOffers() {
+  try {
+    const res = await fetch(`${API_BASE}/api/offers`);
+    const data = await res.json();
+    if (data.success) {
+      allOffers = data.offers;
+      renderOfferStats();
+      renderOffers();
+    }
+  } catch {
+    showAlert("offerError", "❌ Failed to load offers. Is server running?");
+  }
+}
+
+// ── Open the Add Offer modal ──────────────────────────
+function openOfferModal() {
+  // Set minimum expiry date to today
+  const today = new Date().toISOString().split("T")[0];
+  const expiryInput = $("offerExpiry");
+  if (expiryInput) expiryInput.min = today;
+
+  // Populate restaurant dropdown from already-loaded allRestaurants
+  const sel = $("offerRestaurant");
+  if (sel) {
+    sel.innerHTML =
+      `<option value="">-- Select Restaurant --</option>` +
+      allRestaurants.map((r) => `<option value="${r.id}">${r.name}</option>`).join("");
+  }
+
+  openModal("addOfferModal");
+}
+
+// ── Save a new offer ──────────────────────────────────
+async function saveOffer() {
+  const code         = $("offerCode")?.value.trim().toUpperCase();
+  const discount     = parseFloat($("offerDiscount")?.value);
+  const restaurantId = $("offerRestaurant")?.value;
+  const expiryDate   = $("offerExpiry")?.value;
+
+  // Clear previous errors
+  ["offerCodeErr", "offerDiscountErr", "offerRestErr", "offerExpiryErr"].forEach(
+    (id) => $(id)?.classList.remove("show")
+  );
+
+  let hasError = false;
+  if (!code)                          { $("offerCodeErr")?.classList.add("show");     hasError = true; }
+  if (!discount || discount < 1 || discount > 100) { $("offerDiscountErr")?.classList.add("show"); hasError = true; }
+  if (!restaurantId)                  { $("offerRestErr")?.classList.add("show");     hasError = true; }
+  if (!expiryDate)                    { $("offerExpiryErr")?.classList.add("show");   hasError = true; }
+  if (hasError) return;
+
+  setLoading("saveOfferBtn", true);
+  try {
+    const res = await fetch(`${API_BASE}/api/offers`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ code, discount, restaurantId, expiryDate }),
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      closeModal("addOfferModal");
+      clearOfferForm();
+      showAlert("offerSuccess", `✅ Offer "${code}" created successfully!`, "success");
+      loadOffers();
+    } else {
+      showAlert("offerError", "❌ " + data.message);
+    }
+  } catch {
+    showAlert("offerError", "❌ Failed to save. Is server running?");
+  } finally {
+    setLoading("saveOfferBtn", false);
+  }
+}
+
+// ── Clear the form inputs ────────────────────────────
+function clearOfferForm() {
+  ["offerCode", "offerDiscount", "offerExpiry"].forEach((id) => {
+    if ($(id)) $(id).value = "";
+  });
+  if ($("offerRestaurant")) $("offerRestaurant").value = "";
+}
+
+// ── Helper: is an offer expired? ─────────────────────
+function isOfferExpired(expiryDate) {
+  const today  = new Date();
+  today.setHours(0, 0, 0, 0);
+  const expiry = new Date(expiryDate);
+  return expiry < today;
+}
+
+// ── Render stats row ─────────────────────────────────
+function renderOfferStats() {
+  const active  = allOffers.filter((o) => !isOfferExpired(o.expiryDate)).length;
+  const expired = allOffers.length - active;
+  if ($("totalOffers"))   $("totalOffers").textContent   = allOffers.length;
+  if ($("activeOffers"))  $("activeOffers").textContent  = active;
+  if ($("expiredOffers")) $("expiredOffers").textContent = expired;
+}
+
+// ── Filter by search query ───────────────────────────
+function filterOffersBySearch(val) {
+  offerSearchQuery = val.toLowerCase();
+  renderOffers();
+}
+
+// ── Render the offers table ───────────────────────────
+function renderOffers() {
+  const container = $("offersList");
+  if (!container) return;
+
+  const statusFilter = $("offerStatusFilter")?.value || "";
+
+  let items = allOffers.filter((o) => {
+    const expired = isOfferExpired(o.expiryDate);
+
+    // Status filter
+    if (statusFilter === "active"  &&  expired) return false;
+    if (statusFilter === "expired" && !expired) return false;
+
+    // Search filter
+    if (offerSearchQuery) {
+      const inCode = o.code.toLowerCase().includes(offerSearchQuery);
+      const inRest = o.restaurantName.toLowerCase().includes(offerSearchQuery);
+      if (!inCode && !inRest) return false;
+    }
+
+    return true;
+  });
+
+  if (items.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <span>🏷️</span>
+        <p>No offers found</p>
+        <small>Click "+ Add Offer" to create your first discount</small>
+      </div>`;
+    return;
+  }
+
+  // Format date nicely
+  function fmtDate(str) {
+    return new Date(str).toLocaleDateString("en-IN", {
+      day: "2-digit", month: "short", year: "numeric",
+    });
+  }
+
+  container.innerHTML = `
+    <table class="offers-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Code</th>
+          <th>Discount</th>
+          <th>Restaurant</th>
+          <th>Expiry Date</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${items.map((o, i) => {
+          const expired = isOfferExpired(o.expiryDate);
+          return `
+          <tr>
+            <td style="color:var(--grey-3);font-size:13px;">${i + 1}</td>
+            <td><span class="offer-code-badge">${o.code}</span></td>
+            <td><span class="discount-pill">🏷️ ${o.discount}% OFF</span></td>
+            <td style="font-weight:500;">${o.restaurantName}</td>
+            <td style="color:var(--grey-2);font-size:13px;">${fmtDate(o.expiryDate)}</td>
+            <td>
+              ${expired
+                ? `<span class="status-badge expired">❌ Expired</span>`
+                : `<span class="status-badge active">✅ Active</span>`
+              }
+            </td>
+            <td>
+              <button class="icon-btn delete" title="Delete offer"
+                onclick="askDeleteOffer('${o.id}', '${o.code}')">🗑️</button>
+            </td>
+          </tr>`;
+        }).join("")}
+      </tbody>
+    </table>`;
+}
+
+// ── Delete flow ───────────────────────────────────────
+function askDeleteOffer(id, code) {
+  deleteOfferTargetId = id;
+  if ($("deleteOfferCode")) $("deleteOfferCode").textContent = code;
+  openModal("deleteOfferModal");
+}
+
+async function confirmDeleteOffer() {
+  if (!deleteOfferTargetId) return;
+  setLoading("confirmDeleteOfferBtn", true);
+  try {
+    const res  = await fetch(`${API_BASE}/api/offers/${deleteOfferTargetId}`, { method: "DELETE" });
+    const data = await res.json();
+    if (data.success) {
+      closeModal("deleteOfferModal");
+      showAlert("offerSuccess", "✅ Offer deleted.", "success");
+      loadOffers();
+    } else {
+      showAlert("offerError", "❌ " + data.message);
+    }
+  } catch {
+    showAlert("offerError", "❌ Failed to delete.");
+  } finally {
+    setLoading("confirmDeleteOfferBtn", false);
+    deleteOfferTargetId = null;
+  }
+}
+
+// ── Hook into sidebar nav click ───────────────────────
+document.querySelectorAll(".nav-item").forEach((item) => {
+  item.addEventListener("click", () => {
+    if (item.dataset.section === "offers") {
+      loadOffers();
+      // Re-populate restaurant list in case it changed
+      const sel = $("offerRestaurant");
+      if (sel) {
+        sel.innerHTML =
+          `<option value="">-- Select Restaurant --</option>` +
+          allRestaurants.map((r) => `<option value="${r.id}">${r.name}</option>`).join("");
+      }
+    }
+  });
+});
+
+// Also wire the "+ Add Offer" button to use openOfferModal
+// (it is called directly from onclick in HTML, see offers_section.html)

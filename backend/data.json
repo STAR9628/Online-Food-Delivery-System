@@ -41,5 +41,15 @@
       "createdAt": "2026-04-14T15:24:35.175Z"
     }
   ],
-  "offers": []
+  "offers": [
+    {
+      "id": "1776181618736",
+      "code": "SAVE20",
+      "discount": 20,
+      "restaurantId": "1776163546187",
+      "restaurantName": "Burger King",
+      "expiryDate": "2026-04-22",
+      "createdAt": "2026-04-14T15:46:58.736Z"
+    }
+  ]
 }
