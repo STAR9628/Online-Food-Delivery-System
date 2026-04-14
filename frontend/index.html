@@ -27,10 +27,16 @@
         />
       </div>
 
+      
       <!-- Cart Button -->
       <button class="cart-btn" onclick="toggleCart()" id="cartBtn">
         🛒
         <span class="cart-badge" id="cartCount">0</span>
+      </button>
+
+      <!-- My Orders Button -->
+      <button class="orders-btn" onclick="openOrdersModal()">
+        📋 My Orders
       </button>
     </div>
   </header>
@@ -163,7 +169,21 @@
 
   <!-- ===== ORDER SUCCESS TOAST ===== -->
   <div class="toast" id="successToast">✅ Order placed successfully!</div>
-
+<!-- ===== ORDER HISTORY MODAL ===== -->
+<div class="modal-overlay" id="ordersModal" onclick="closeOrdersModal(event)">
+  <div class="orders-modal-box">
+    <div class="orders-modal-header">
+      <h2>📋 My Orders</h2>
+      <button class="modal-close" onclick="document.getElementById('ordersModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="orders-modal-body" id="ordersModalBody">
+      <div class="menu-loading">
+        <div class="spinner"></div>
+        <p>Loading orders...</p>
+      </div>
+    </div>
+  </div>
+</div>
   <script src="customer.js"></script>
 </body>
 </html>

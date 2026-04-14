@@ -456,3 +456,65 @@ async function checkout() {
     if (placeBtn) { placeBtn.disabled = false; placeBtn.textContent = "Place Order →"; }
   }
 }
+
+// ===================================================
+//  STEP 7: ORDER HISTORY
+// ===================================================
+
+async function openOrdersModal() {
+  const modal = document.getElementById("ordersModal");
+  const body  = document.getElementById("ordersModalBody");
+  modal.classList.add("open");
+  body.innerHTML = `<div class="menu-loading"><div class="spinner"></div><p>Loading orders...</p></div>`;
+
+  try {
+    const res  = await fetch(`${API_BASE}/api/orders`);
+    const data = await res.json();
+    const orders = (data.orders || []).slice().reverse(); // newest first
+
+    if (orders.length === 0) {
+      body.innerHTML = `
+        <div class="no-orders">
+          <span>📋</span>
+          <p>No orders yet</p>
+          <small>Your placed orders will appear here.</small>
+        </div>`;
+      return;
+    }
+
+    body.innerHTML = orders.map(order => {
+      const itemsList = (order.items || [])
+        .map(i => `${i.name} × ${i.qty}`)
+        .join(", ");
+
+      const date = new Date(order.placedAt).toLocaleString("en-IN", {
+        day: "2-digit", month: "short", year: "numeric",
+        hour: "2-digit", minute: "2-digit"
+      });
+
+      return `
+        <div class="order-card">
+          <div class="order-card-header">
+            <span class="order-id">${order.id}</span>
+            <span class="order-status-badge">${order.status}</span>
+          </div>
+          <div class="order-restaurant">🏪 ${order.restaurantName || "Restaurant"}</div>
+          <div class="order-items-list">🍽️ ${itemsList || "—"}</div>
+          <div class="order-card-footer">
+            <span class="order-total">₹${order.total}</span>
+            <span class="order-date">${date}</span>
+          </div>
+        </div>`;
+    }).join("");
+
+  } catch (err) {
+    body.innerHTML = `<div class="no-orders"><span>⚠️</span><p>Could not load orders. Is the server running?</p></div>`;
+  }
+}
+
+function closeOrdersModal(event) {
+  const box = document.querySelector(".orders-modal-box");
+  if (box && !box.contains(event.target)) {
+    document.getElementById("ordersModal").classList.remove("open");
+  }
+}

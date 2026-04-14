@@ -893,3 +893,132 @@
 @media (max-width: 360px) {
   .restaurant-grid { grid-template-columns: 1fr; }
 }
+
+/* ===== MY ORDERS BUTTON ===== */
+.orders-btn {
+  background: #fff7f0;
+  color: var(--primary, #fc8019);
+  border: 1.5px solid var(--primary, #fc8019);
+  border-radius: 20px;
+  padding: 7px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+.orders-btn:hover {
+  background: var(--primary, #fc8019);
+  color: #fff;
+}
+
+/* ===== ORDERS MODAL ===== */
+.orders-modal-box {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+  animation: slideUp 0.25s ease;
+}
+.orders-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.orders-modal-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #282c3f;
+  margin: 0;
+}
+.orders-modal-body {
+  overflow-y: auto;
+  padding: 16px 24px;
+  flex: 1;
+}
+
+/* ===== ORDER CARD ===== */
+.order-card {
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 14px;
+  transition: box-shadow 0.2s;
+}
+.order-card:hover {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+.order-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.order-id {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary, #fc8019);
+  font-family: monospace;
+}
+.order-status-badge {
+  background: #e8f5e9;
+  color: #2e7d32;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+}
+.order-restaurant {
+  font-size: 14px;
+  font-weight: 600;
+  color: #282c3f;
+  margin-bottom: 6px;
+}
+.order-items-list {
+  font-size: 13px;
+  color: #686b78;
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+.order-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px dashed #ebebeb;
+  padding-top: 10px;
+  margin-top: 6px;
+}
+.order-total {
+  font-size: 15px;
+  font-weight: 700;
+  color: #282c3f;
+}
+.order-date {
+  font-size: 12px;
+  color: #93959f;
+}
+
+/* No orders state */
+.no-orders {
+  text-align: center;
+  padding: 40px 20px;
+  color: #93959f;
+}
+.no-orders span {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 12px;
+}
+.no-orders p {
+  font-size: 15px;
+  font-weight: 500;
+}
