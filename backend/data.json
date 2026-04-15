@@ -30,15 +30,136 @@
   ],
   "menuItems": [
     {
-      "id": "1776180275175",
+      "id": "1776227555830",
       "restaurantId": "1776163546187",
       "restaurantName": "Burger King",
-      "name": "The Whopper",
+      "name": "Korean Kimchi Veg Whopper",
+      "price": 250,
+      "category": "Main Course",
+      "isVeg": true,
+      "description": "XL size 7 layer Veg Whopper with crunchy veg patty dunked in hot & sweet Korean glaze, sesame mayo and spicy tangy kimchi in premium glazed buns for authentic korean flavours Qty: 354 gm",
+      "createdAt": "2026-04-15T04:32:35.830Z"
+    },
+    {
+      "id": "1776227596547",
+      "restaurantId": "1776163546187",
+      "restaurantName": "Burger King",
+      "name": "Korean Kimchi Chicken Whopper",
+      "price": 225,
+      "category": "Main Course",
+      "isVeg": false,
+      "description": "XL size 7 layer Grill Chicken Whopper with grill chicken patty dunked in hot & sweet Korean glaze, sesame mayo and spicy tangy kimchi in premium glazed buns for authentic korean flavours Qty: 358 gm",
+      "createdAt": "2026-04-15T04:33:16.547Z"
+    },
+    {
+      "id": "1776227637568",
+      "restaurantId": "1776163546187",
+      "restaurantName": "Burger King",
+      "name": "Veg Whopper Deluxe",
       "price": 200,
       "category": "Main Course",
       "isVeg": true,
-      "description": "amazing burger",
-      "createdAt": "2026-04-14T15:24:35.175Z"
+      "description": "Reg. Size premium glaze bun with 7 layers of taste: Extra Crunchy Veg patty fresh onion, crispy lettuce, juicy tomatoes (seasonal), tangy gherkins, creamy & smoky sauces. Qty: 195 gms| Kcal: 484 | Carbs: 49 gms| Sugar: 10 gms| Fat: 27 gms| Saturated fat: 9 gms| Protein: 11 gms|Qty: 194 Gms| Kcal: 456 | Carbs 61.6 Gms| Sugar: 9.2 Gms| Fat: 20 Gms| Saturated fat: 11.9 Gms| Protein: 7.2 Gms| Sodium: 1428.1 Mg Contains: Gluten, Soybean, Milk, Sesame seeds",
+      "createdAt": "2026-04-15T04:33:57.568Z"
+    },
+    {
+      "id": "1776227678951",
+      "restaurantId": "1776163546187",
+      "restaurantName": "Burger King",
+      "name": "Original Whopper Chicken(XL size Bun)",
+      "price": 270,
+      "category": "Main Course",
+      "isVeg": true,
+      "description": "Our Original Whopper with Flame Grilled Chicken Patty, Onions, Lettuce, Tomatoes (Seasonal), Gherkins, Creamy And Smoky Sauces With Xxl Buns. Qty: 280 Gms| Kcal: 667.2 | Carbs 59.1 Gms| Sugar: 8.7 Gms| Fat: 36.3 Gms| Saturated fat: 8.1 Gms| Protein: 26.2 Gms| Sodium: 1018.7 Mg Contains: Gluten, Soybean, Milk, Sesame seeds",
+      "createdAt": "2026-04-15T04:34:38.951Z"
+    },
+    {
+      "id": "1776227998519",
+      "restaurantId": "1776180205293",
+      "restaurantName": "Domino's",
+      "name": "Peppy Paneer Pizza",
+      "price": 269,
+      "category": "Main Course",
+      "isVeg": true,
+      "description": "Flavorful trio of juicy paneer, crisp capsicum with spicy red paprika",
+      "createdAt": "2026-04-15T04:39:58.519Z"
+    },
+    {
+      "id": "1776228048621",
+      "restaurantId": "1776180205293",
+      "restaurantName": "Domino's",
+      "name": "Farmhouse Cheese Burst",
+      "price": 359,
+      "category": "Main Course",
+      "isVeg": true,
+      "description": "Now in 3 New Flavours - Molten Cheese Indulgence with combination of onion, capsicum, tomato & grilled mushroom",
+      "createdAt": "2026-04-15T04:40:48.621Z"
+    },
+    {
+      "id": "1776228079187",
+      "restaurantId": "1776180205293",
+      "restaurantName": "Domino's",
+      "name": "Spiced Double Chicken Pizza",
+      "price": 369,
+      "category": "Main Course",
+      "isVeg": false,
+      "description": "Molten Cheese Indulgence with combination of Pepper Barbecue Chicken & Peri Peri Chicken for Chicken lovers",
+      "createdAt": "2026-04-15T04:41:19.187Z"
+    },
+    {
+      "id": "1776228108419",
+      "restaurantId": "1776180205293",
+      "restaurantName": "Domino's",
+      "name": "Pepper Barbecue Chicken Cheese Burst",
+      "price": 339,
+      "category": "Main Course",
+      "isVeg": false,
+      "description": "Now in 3 New Flavours - Molten Cheese Indulgence with Pepper Barbecue chicken for that extra zing",
+      "createdAt": "2026-04-15T04:41:48.419Z"
+    },
+    {
+      "id": "1776228230442",
+      "restaurantId": "1776180236973",
+      "restaurantName": "KFC",
+      "name": "Wednesday Chicken Bucket",
+      "price": 300,
+      "category": "Main Course",
+      "isVeg": false,
+      "description": "Enjoy Special Wednesday Bucket with flat 37% off on 10 pcs of Hot & Crispy Chicken",
+      "createdAt": "2026-04-15T04:43:50.442Z"
+    },
+    {
+      "id": "1776228305479",
+      "restaurantId": "1776180236973",
+      "restaurantName": "KFC",
+      "name": "Chicken Zinger Burger - Tandoori",
+      "price": 239,
+      "category": "Main Course",
+      "isVeg": false,
+      "description": "Chicken zinger with a delicious Indian Tandoori flavour sauce and Mayo",
+      "createdAt": "2026-04-15T04:45:05.479Z"
+    },
+    {
+      "id": "1776228340095",
+      "restaurantId": "1776180236973",
+      "restaurantName": "KFC",
+      "name": "American Classic Zinger Mojito Combo",
+      "price": 439,
+      "category": "Main Course",
+      "isVeg": false,
+      "description": "Get All New Mojito Reusable Bottle with American Classic Chicken Zinger Burger",
+      "createdAt": "2026-04-15T04:45:40.095Z"
+    },
+    {
+      "id": "1776228490041",
+      "restaurantId": "1776180236973",
+      "restaurantName": "KFC",
+      "name": "Paneer Zinger Burger",
+      "price": 239,
+      "category": "Main Course",
+      "isVeg": true,
+      "description": "It's Back! Crunchy Indian Paneer Patty Burger with tangy sauce and Veggies",
+      "createdAt": "2026-04-15T04:48:10.041Z"
     }
   ],
   "offers": [
@@ -50,6 +171,24 @@
       "restaurantName": "Burger King",
       "expiryDate": "2026-04-22",
       "createdAt": "2026-04-14T15:46:58.736Z"
+    },
+    {
+      "id": "1776228401513",
+      "code": "FAST50",
+      "discount": 50,
+      "restaurantId": "1776180205293",
+      "restaurantName": "Domino's",
+      "expiryDate": "2026-04-29",
+      "createdAt": "2026-04-15T04:46:41.513Z"
+    },
+    {
+      "id": "1776228424539",
+      "code": "OFFERT20",
+      "discount": 20,
+      "restaurantId": "1776180236973",
+      "restaurantName": "KFC",
+      "expiryDate": "2026-04-28",
+      "createdAt": "2026-04-15T04:47:04.539Z"
     }
   ],
   "orders": [
